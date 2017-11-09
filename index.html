@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+			body {
+				background-color: #f0f0f0;
+				margin: 0px;
+				overflow: hidden;
+			}
+		</style>
+</head>
+<body>
+		<div id="webgl-container"></div>
+		<script type="text/javascript" src="node-modules/three.js"></script>
+		<script src='node-modules/TrackballControls.js'></script>
+		<script type="text/javascript">
+          // P/O Camera Tester
+
+          var hostDiv, scene, renderer, light, o;
+          var pCamera, oCamera, watchCamera;
+          var pControls, oControls;
+          var pHelper, oHelper;
+
+          var WIDTH = 600,
+            HEIGHT = 300,
+            FOV = 28,
+            NEAR = 40,
+            FAR = 60;
+
+          var oBackup, dist = 0;
+          function render() {
+            oBackup = oCamera.clone();
+
+
+
+            renderer.clear();
+
+            renderer.setViewport(0, 0, WIDTH/2, HEIGHT);
+
+            if(o) {
+              renderer.render(scene, oCamera);
+            }
+            else {
+
+            }
+
+
+            oControls.update();
+
+            if(o) {
+              // zoom
+              if(oBackup.top !== oCamera.top ||
+                oBackup.right !== oCamera.right ||
+                oBackup.bottom !== oCamera.bottom ||
+                oBackup.left !== oCamera.left) {
+
+              }
+
+            }
+            else {
+
+            }
+
+            if(oCamera.up.x === undefined) debugger;
+
+
+
+
+            oCamera.near = dist - 10;
+            oCamera.far = dist + 10;
+
+
+            oCamera.updateProjectionMatrix();
+
+
+            oHelper.update();
+
+            renderer.setViewport(WIDTH/2, 0, WIDTH/2, HEIGHT);
+
+            oBackup = null;
+          }
+
+          function animate() {
+
+            requestAnimationFrame(animate);
+
+            render();
+          }
+
+          function init() {
+            o = false;
+
+            hostDiv = document.createElement('div');
+            hostDiv.style.position = 'relative';
+            hostDiv.style.top = '0';
+            hostDiv.style.left = '0';
+            document.body.appendChild(hostDiv);
+
+            var moveDiv = document.createElement('div');
+            moveDiv.style.position = 'absolute';
+            moveDiv.style.top = '0';
+            moveDiv.style.left = '0';
+            moveDiv.style.width = (WIDTH/2).toString() + 'px';
+            moveDiv.style.height = (HEIGHT).toString() + 'px';
+
+            scene = new THREE.Scene();
+
+
+
+
+            oCamera = new THREE.OrthographicCamera( -12, 12, 12, -12, NEAR, FAR );
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, preserverDrawingBuffer: true });
+            renderer.setSize(WIDTH, HEIGHT);
+            renderer.domElement.style.position = "relative";
+            hostDiv.appendChild(renderer.domElement);
+            hostDiv.appendChild(moveDiv);
+            renderer.autoClear = false;
+
+
+            oCamera.position.z = 50;
+
+
+            oControls = new THREE.TrackballControls(oCamera, moveDiv);
+
+
+            oControls.target.set(0, 0, 0);
+
+            light = new THREE.PointLight(0xffffff, 1., Infinity);
+            var hemi = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.5);
+
+            var cube = colorCube(5);
+
+
+            scene.add(oCamera);
+            scene.add(light);
+            scene.add(hemi);
+            scene.add(cube);
+
+            var debug = true;
+            if(debug) {
+
+              scene.add( pHelper );
+              oHelper = new THREE.CameraHelper( oCamera );
+              scene.add( oHelper );
+
+              var sphereSize = 1;
+              var pointLightHelper = new THREE.PointLightHelper( light, sphereSize );
+              scene.add( pointLightHelper );
+
+              var arrowXp = new THREE.ArrowHelper(
+                new THREE.Vector3(1, 0, 0),
+                new THREE.Vector3(0, 0, 0),
+                10,
+                0x00ff00);
+              scene.add(arrowXp);
+
+              var arrowXn = new THREE.ArrowHelper(
+                new THREE.Vector3(-1, 0, 0),
+                new THREE.Vector3(0, 0, 0),
+                10,
+                0xff00ff);
+              scene.add(arrowXn);
+
+              var arrowYp = new THREE.ArrowHelper(
+                new THREE.Vector3(0, 1, 0),
+                new THREE.Vector3(0, 0, 0),
+                10,
+                0x00ffff);
+              scene.add(arrowYp);
+
+              var arrowYn = new THREE.ArrowHelper(
+                new THREE.Vector3(0, -1, 0),
+                new THREE.Vector3(0, 0, 0),
+                10,
+                0xffff00);
+              scene.add(arrowYn);
+
+              var arrowZp = new THREE.ArrowHelper(
+                new THREE.Vector3(0, 0, 1),
+                new THREE.Vector3(0, 0, 0),
+                10,
+                0xff0000);
+              scene.add(arrowZp);
+
+              var arrowZn = new THREE.ArrowHelper(
+                new THREE.Vector3(0, 0, -1),
+                new THREE.Vector3(0, 0, 0),
+                10,
+                0x0000ff);
+              scene.add(arrowZn);
+            }
+
+            animate();
+          }
+
+          function change(e) {
+            o = e.checked;
+          }
+
+          function colorCube(scale) {
+            var geo = new THREE.BufferGeometry();
+
+            var positions = new Float32Array(72);
+            var normals = new Float32Array(72);
+            var colors = new Float32Array(72);
+            var indices = new Uint16Array(36);
+
+            var face = 0, idx = 0, vert = 0;
+            var x = 0, r = 0, y = 1, g = 1, z = 2, b = 2;
+
+            // front face (RED)
+            positions[vert + x] = -0.5;
+            positions[vert + y] = 0.5;
+            positions[vert + z] = 0.5;
+            normals[vert + x] = 0.;
+            normals[vert + y] = 0.;
+            normals[vert + z] = 1.;
+            colors[vert + r] = 1.;
+            colors[vert + g] = 0.;
+            colors[vert + b] = 0.;
+            vert += 3;
+
+            positions[vert + x] = -0.5;
+            positions[vert + y] = -0.5;
+            positions[vert + z] = 0.5;
+            normals[vert + x] = 0.;
+            normals[vert + y] = 0.;
+            normals[vert + z] = 1.;
+            colors[vert + r] = 1.;
+            colors[vert + g] = 0.;
+            colors[vert + b] = 0.;
+            vert += 3;
+
+            positions[vert + x] = 0.5;
+            positions[vert + y] = -0.5;
+            positions[vert + z] = 0.5;
+            normals[vert + x] = 0.;
+            normals[vert + y] = 0.;
+            normals[vert + z] = 1.;
+            colors[vert + r] = 1.;
+            colors[vert + g] = 0.;
+            colors[vert + b] = 0.;
+            vert += 3;
+
+            positions[vert + x] = 0.5;
+            positions[vert + y] = 0.5;
+            positions[vert + z] = 0.5;
+            normals[vert + x] = 0.;
+            normals[vert + y] = 0.;
+            normals[vert + z] = 1.;
+            colors[vert + r] = 1.;
+            colors[vert + g] = 0.;
+            colors[vert + b] = 0.;
+            vert += 3;
+
+            indices[idx + 0] = (face * 4) + 0;
+            indices[idx + 1] = (face * 4) + 1;
+            indices[idx + 2] = (face * 4) + 2;
+            indices[idx + 3] = (face * 4) + 0;
+            indices[idx + 4] = (face * 4) + 2;
+            indices[idx + 5] = (face * 4) + 3;
+            idx += 6;
+            ++face;
+
+            // back face (BLUE)
+            positions[vert + x] = -0.5;
+            positions[vert + y] = 0.5;
+            positions[vert + z] = -0.5;
+            normals[vert + x] = 0.;
+            normals[vert + y] = 0.;
+            normals[vert + z] = -1.;
+            colors[vert + r] = 0.;
+            colors[vert + g] = 0.;
+            colors[vert + b] = 1.;
+            vert += 3;
+
+            positions[vert + x] = -0.5;
+            positions[vert + y] = -0.5;
+            positions[vert + z] = -0.5;
+            normals[vert + x] = 0.;
+            normals[vert + y] = 0.;
+            normals[vert + z] = -1.;
+            colors[vert + r] = 0.;
+            colors[vert + g] = 0.;
+            colors[vert + b] = 1.;
+            vert += 3;
+
+            positions[vert + x] = 0.5;
+            positions[vert + y] = -0.5;
+            positions[vert + z] = -0.5;
+            normals[vert + x] = 0.;
+            normals[vert + y] = 0.;
+            normals[vert + z] = -1.;
+            colors[vert + r] = 0.;
+            colors[vert + g] = 0.;
+            colors[vert + b] = 1.;
+            vert += 3;
+
+            positions[vert + x] = 0.5;
+            positions[vert + y] = 0.5;
+            positions[vert + z] = -0.5;
+            normals[vert + x] = 0.;
+            normals[vert + y] = 0.;
+            normals[vert + z] = -1.;
+            colors[vert + r] = 0.;
+            colors[vert + g] = 0.;
+            colors[vert + b] = 1.;
+            vert += 3;
+
+            indices[idx + 0] = (face * 4) + 0;
+            indices[idx + 1] = (face * 4) + 1;
+            indices[idx + 2] = (face * 4) + 2;
+            indices[idx + 3] = (face * 4) + 0;
+            indices[idx + 4] = (face * 4) + 2;
+            indices[idx + 5] = (face * 4) + 3;
+            idx += 6;
+            ++face;
+
+            // right face (GREEN)
+            positions[vert + x] = 0.5;
+            positions[vert + y] = 0.5;
+            positions[vert + z] = -0.5;
+            normals[vert + x] = 1.;
+            normals[vert + y] = 0.;
+            normals[vert + z] = 0.;
+            colors[vert + r] = 0.;
+            colors[vert + g] = 1.;
+            colors[vert + b] = 0.;
+            vert += 3;
+
+            positions[vert + x] = 0.5;
+            positions[vert + y] = -0.5;
+            positions[vert + z] = -0.5;
+            normals[vert + x] = 1.;
+            normals[vert + y] = 0.;
+            normals[vert + z] = 0.;
+            colors[vert + r] = 0.;
+            colors[vert + g] = 1.;
+            colors[vert + b] = 0.;
+            vert += 3;
+
+            positions[vert + x] = 0.5;
+            positions[vert + y] = -0.5;
+            positions[vert + z] = 0.5;
+            normals[vert + x] = 1.;
+            normals[vert + y] = 0.;
+            normals[vert + z] = 0.;
+            colors[vert + r] = 0.;
+            colors[vert + g] = 1.;
+            colors[vert + b] = 0.;
+            vert += 3;
+
+            positions[vert + x] = 0.5;
+            positions[vert + y] = 0.5;
+            positions[vert + z] = 0.5;
+            normals[vert + x] = 1.;
+            normals[vert + y] = 0.;
+            normals[vert + z] = 0.;
+            colors[vert + r] = 0.;
+            colors[vert + g] = 1.;
+            colors[vert + b] = 0.;
+            vert += 3;
+
+            indices[idx + 0] = (face * 4) + 0;
+            indices[idx + 1] = (face * 4) + 1;
+            indices[idx + 2] = (face * 4) + 2;
+            indices[idx + 3] = (face * 4) + 0;
+            indices[idx + 4] = (face * 4) + 2;
+            indices[idx + 5] = (face * 4) + 3;
+            idx += 6;
+            ++face;
+
+            // left face (MAGENTA)
+            positions[vert + x] = -0.5;
+            positions[vert + y] = 0.5;
+            positions[vert + z] = -0.5;
+            normals[vert + x] = -1.;
+            normals[vert + y] = 0.;
+            normals[vert + z] = 0.;
+            colors[vert + r] = 1.;
+            colors[vert + g] = 0.;
+            colors[vert + b] = 1.;
+            vert += 3;
+
+            positions[vert + x] = -0.5;
+            positions[vert + y] = -0.5;
+            positions[vert + z] = -0.5;
+            normals[vert + x] = -1.;
+            normals[vert + y] = 0.;
+            normals[vert + z] = 0.;
+            colors[vert + r] = 1.;
+            colors[vert + g] = 0.;
+            colors[vert + b] = 1.;
+            vert += 3;
+
+            positions[vert + x] = -0.5;
+            positions[vert + y] = -0.5;
+            positions[vert + z] = 0.5;
+            normals[vert + x] = -1.;
+            normals[vert + y] = 0.;
+            normals[vert + z] = 0.;
+            colors[vert + r] = 1.;
+            colors[vert + g] = 0.;
+            colors[vert + b] = 1.;
+            vert += 3;
+
+            positions[vert + x] = -0.5;
+            positions[vert + y] = 0.5;
+            positions[vert + z] = 0.5;
+            normals[vert + x] = -1.;
+            normals[vert + y] = 0.;
+            normals[vert + z] = 0.;
+            colors[vert + r] = 1.;
+            colors[vert + g] = 0.;
+            colors[vert + b] = 1.;
+            vert += 3;
+
+            indices[idx + 0] = (face * 4) + 0;
+            indices[idx + 1] = (face * 4) + 1;
+            indices[idx + 2] = (face * 4) + 2;
+            indices[idx + 3] = (face * 4) + 0;
+            indices[idx + 4] = (face * 4) + 2;
+            indices[idx + 5] = (face * 4) + 3;
+            idx += 6;
+            ++face;
+
+            // top face (CYAN)
+            positions[vert + x] = -0.5;
+            positions[vert + y] = 0.5;
+            positions[vert + z] = -0.5;
+            normals[vert + x] = 0.;
+            normals[vert + y] = 1.;
+            normals[vert + z] = 0.;
+            colors[vert + r] = 0.;
+            colors[vert + g] = 1.;
+            colors[vert + b] = 1.;
+            vert += 3;
+
+            positions[vert + x] = 0.5;
+            positions[vert + y] = 0.5;
+            positions[vert + z] = -0.5;
+            normals[vert + x] = 0.;
+            normals[vert + y] = 1.;
+            normals[vert + z] = 0.;
+            colors[vert + r] = 0.;
+            colors[vert + g] = 1.;
+            colors[vert + b] = 1.;
+            vert += 3;
+
+            positions[vert + x] = 0.5;
+            positions[vert + y] = 0.5;
+            positions[vert + z] = 0.5;
+            normals[vert + x] = 0.;
+            normals[vert + y] = 1.;
+            normals[vert + z] = 0.;
+            colors[vert + r] = 0.;
+            colors[vert + g] = 1.;
+            colors[vert + b] = 1.;
+            vert += 3;
+
+            positions[vert + x] = -0.5;
+            positions[vert + y] = 0.5;
+            positions[vert + z] = 0.5;
+            normals[vert + x] = 0.;
+            normals[vert + y] = 1.;
+            normals[vert + z] = 0.;
+            colors[vert + r] = 0.;
+            colors[vert + g] = 1.;
+            colors[vert + b] = 1.;
+            vert += 3;
+
+            indices[idx + 0] = (face * 4) + 0;
+            indices[idx + 1] = (face * 4) + 1;
+            indices[idx + 2] = (face * 4) + 2;
+            indices[idx + 3] = (face * 4) + 0;
+            indices[idx + 4] = (face * 4) + 2;
+            indices[idx + 5] = (face * 4) + 3;
+            idx += 6;
+            ++face;
+
+            // bottom face (YELLOW)
+            positions[vert + x] = -0.5;
+            positions[vert + y] = -0.5;
+            positions[vert + z] = -0.5;
+            normals[vert + x] = 0.;
+            normals[vert + y] = -1.;
+            normals[vert + z] = 0.;
+            colors[vert + r] = 1.;
+            colors[vert + g] = 1.;
+            colors[vert + b] = 0.;
+            vert += 3;
+
+            positions[vert + x] = 0.5;
+            positions[vert + y] = -0.5;
+            positions[vert + z] = -0.5;
+            normals[vert + x] = 0.;
+            normals[vert + y] = -1.;
+            normals[vert + z] = 0.;
+            colors[vert + r] = 1.;
+            colors[vert + g] = 1.;
+            colors[vert + b] = 0.;
+            vert += 3;
+
+            positions[vert + x] = 0.5;
+            positions[vert + y] = -0.5;
+            positions[vert + z] = 0.5;
+            normals[vert + x] = 0.;
+            normals[vert + y] = -1.;
+            normals[vert + z] = 0.;
+            colors[vert + r] = 1.;
+            colors[vert + g] = 1.;
+            colors[vert + b] = 0.;
+            vert += 3;
+
+            positions[vert + x] = -0.5;
+            positions[vert + y] = -0.5;
+            positions[vert + z] = 0.5;
+            normals[vert + x] = 0.;
+            normals[vert + y] = -1.;
+            normals[vert + z] = 0.;
+            colors[vert + r] = 1.;
+            colors[vert + g] = 1.;
+            colors[vert + b] = 0.;
+            vert += 3;
+
+            indices[idx + 0] = (face * 4) + 0;
+            indices[idx + 1] = (face * 4) + 1;
+            indices[idx + 2] = (face * 4) + 2;
+            indices[idx + 3] = (face * 4) + 0;
+            indices[idx + 4] = (face * 4) + 2;
+            indices[idx + 5] = (face * 4) + 3;
+            idx += 6;
+            ++face;
+
+            geo.addAttribute('index', new THREE.BufferAttribute(indices, 1));
+            geo.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geo.addAttribute('normal', new THREE.BufferAttribute(normals, 3));
+            geo.addAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            indices[idx + 0] = (face * 4) + 0;
+            indices[idx + 1] = (face * 4) + 1;
+            indices[idx + 2] = (face * 4) + 2;
+            indices[idx + 3] = (face * 4) + 0;
+            indices[idx + 4] = (face * 4) + 2;
+            indices[idx + 5] = (face * 4) + 3;
+            idx += 6;
+            ++face;
+
+            geo.addAttribute('index', new THREE.BufferAttribute(indices, 1));
+            geo.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geo.addAttribute('normal', new THREE.BufferAttribute(normals, 3));
+            geo.addAttribute('color', new THREE.BufferAttribute(colors, 3));
+            var mat = new THREE.MeshPhongMaterial({
+              color: 0xffffff,
+              ambient: 0xffffff,
+              specular: 0xffffff,
+              shininess: 50,
+              side: THREE.DoubleSide,
+              vertexColors: THREE.VertexColors
+            });
+            var msh = new THREE.Mesh(geo, mat);
+            msh.scale.multiplyScalar(scale);
+
+            return msh;
+          }
+          init();
+
+		</script>
+
+</body>
+</html>
