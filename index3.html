@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Karma</title>
+    <style>
+            body{
+                background: white;
+                margin:0;
+                padding:0;
+                overflow: hidden;
+            }
+    </style>
+</head>
+<body>
+
+
+ <div id="webgl-container"></div>
+
+  <script src='node-modules/three.js'></script>
+  <script type="text/javascript">
+
+ 
+var scene = new THREE.Scene();
+
+var camera = new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,1,1000);
+
+var renderer = new THREE.WebGLRenderer();
+
+
+renderer.setSize( window.innerWidth, window.innerHeight );
+
+// tried this a little different from the example in docs
+document.getElementById("webgl-container").appendChild(renderer.domElement);
+
+
+//  This is where introtowebgl uses CubeGeometry
+var geometry = new THREE.BoxGeometry(1,1,1);
+console.log("vertice", geometry.vertices);
+
+// Line start
+var material2 = new THREE.LineBasicMaterial({
+  color: 0x0000ff
+});
+
+var geometry2 = new THREE.Geometry();
+// geometry2.vertices.push(
+//   new THREE.Vector3( -10, 0, 0 ),
+//   new THREE.Vector3( 0, 10, 0 ),
+//   new THREE.Vector3( 10, 0, 0 )
+// );
+
+// geometry2.vertices.push(
+//   geometry.vertices[0],
+//   geometry.vertices[1],
+//   geometry.vertices[2]
+// );
+
+/*geometry2.vertices.push(
+  new THREE.Vector3( 0, 0, 0 ),
+  new THREE.Vector3( 0, 10, 0 ),
+  new THREE.Vector3( 10, 10, 0 ),
+  new THREE.Vector3( 10, 0, 0 ),
+  new THREE.Vector3( 0, 0, 0 )
+);*/
+geometry2.vertices.push(
+  new THREE.Vector3( -2.5, -2.5),
+  new THREE.Vector3( -2.5, 2.5 ),
+  new THREE.Vector3( 2.5, 2.5 ),
+  new THREE.Vector3( 2.5, -2.5 ),
+  new THREE.Vector3( -2.5, -2.5),
+ 
+);
+
+var line = new THREE.Line( geometry2, material2 );
+scene.add( line );
+// Line end
+
+
+
+var material = new THREE.MeshBasicMaterial({color:"yellow"});
+
+var cube = new THREE.Mesh(geometry,material);
+
+console.log(cube.rotation);
+
+// scene.add(cube);
+
+camera.position.z = 20;
+
+
+function render (){
+ 
+  renderer.render(scene,camera);
+}
+render();
+  </script>
+</body>
+</html>
